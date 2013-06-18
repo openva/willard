@@ -158,7 +158,7 @@ foreach ($periods as $period_id => $period_range)
 	if (file_exists($period_id . '.json') === FALSE)
 	{
 		$registrations = fetch_list($period_id);
-		file_put_contents($period_id . '.json', json_encode($registrations));
+		file_put_contents(substr($period_range, 0, 4) . '.json', json_encode($registrations));
 	}
 	
 	/*
