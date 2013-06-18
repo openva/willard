@@ -24,14 +24,11 @@ include('class.simple_html_dom.inc.php');
 
 function fetch_list($period_id)
 {
-
+	
 	if (empty($period_id))
 	{
 		return FALSE;
 	}
-
-	// DO WE NEED THIS PARAMETER?
-	// &principalName=
 	
 	/*
 	 * Initialize our cURL session.
