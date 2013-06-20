@@ -155,10 +155,20 @@ foreach ($html->find('option') as $option)
 foreach ($periods as $period_id => $period_range)
 {
 	
-	if (file_exists($period_id . '.json') === FALSE)
+	/*
+	 * Define the filename for this period's JSON file.
+	 */
+	$filename = substr($period_range, 0, 4) . '.json';
+	
+	echo $period_range . PHP_EOL;
+	
+	/*
+	 * Only update the file if we don't already have a copy.
+	 */
+	if (file_exists($filename) === FALSE)
 	{
 		$registrations = fetch_list($period_id);
-		file_put_contents(substr($period_range, 0, 4) . '.json', json_encode($registrations));
+		file_put_contents($filename, json_encode($registrations));
 	}
 	
 	/*
