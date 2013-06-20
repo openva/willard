@@ -53,17 +53,50 @@ function fetch_list($period_id)
 	curl_close($ch);
 
 	/*
-	 * This HTML is wildly invalid. Clean it up with HTML Tidy.
-	 */
-	$tidy = new tidy;
-	$tidy->parseString($html);
-	$tidy->cleanRepair();
-	$html = $tidy;
-
-	/*
 	 * Render this as an object with PHP Simple HTML DOM Parser.
 	 */
 	$html = str_get_html($html);
+	
+	/*
+	 * We could not render this HTML as an object.
+	 */
+	if ($html === FALSE)
+	{
+
+		/*
+		 * This HTML is invalid. Clean it up with HTML Tidy.
+		 */
+		if (class_exists('tidy', FALSE))
+		{
+	
+			$tidy = new tidy;
+			$tidy->parseString($html);
+			$tidy->cleanRepair();
+			$html = $tidy;
+			
+		}
+		
+		elseif (exec('which tidy'))
+		{
+		
+			$filename = '/tmp/' . $period_id .'.tmp';
+			file_put_contents($filename, $html);
+			exec('tidy --show-errors 0 --show-warnings no -q -m ' . $filename);
+			$html = file_get_contents($filename);
+			unlink($filename);
+			
+		}
+			
+		/*
+		 * Try again to render this as an object with PHP Simple HTML DOM Parser.
+		 */
+		$html = str_get_html($html);
+		
+		if ($html === FALSE)
+		{
+			die('Invalid HTML -- could not be rendered as an object.');
+		}
+	}
 	
 	/*
 	 * Create the object that we'll use to store the list of periods.
