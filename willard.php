@@ -1,5 +1,8 @@
 <?php
 
+// TO DO
+// It's outputting blank data for all years, up until 2013. That's obviously bad.
+
 /**
  * Willard
  *
@@ -35,7 +38,8 @@ function fetch_list($period_id)
 	 */
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, TRUE);
-	curl_setopt($ch, CURLOPT_TIMEOUT_MS, 20000);
+	/* We need a long timeout, because the remote server is slow. */
+	curl_setopt($ch, CURLOPT_TIMEOUT_MS, 30000);
 	curl_setopt($ch, CURLOPT_URL, 'https://solutions.virginia.gov/Lobbyist/Reports/LobbyistSearch');
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 	$allowed_protocols = CURLPROTO_HTTP | CURLPROTO_HTTPS;
@@ -51,16 +55,23 @@ function fetch_list($period_id)
 	}
 
 	curl_close($ch);
-
+	
+	/*
+	 * Carve out the bit that we need, ignoring everything else.
+	 */
+	 $start = strpos($html, '<tbody>');
+	 $end = strpos($html, '</tbody>');
+	 $html = substr($html, $start, ($end - $start + 7));
+	
 	/*
 	 * Render this as an object with PHP Simple HTML DOM Parser.
 	 */
-	$html = str_get_html($html);
-	
+	$dom = str_get_html($html);
+
 	/*
 	 * We could not render this HTML as an object.
 	 */
-	if ($html === FALSE)
+	if ($dom === FALSE)
 	{
 
 		/*
@@ -86,13 +97,13 @@ function fetch_list($period_id)
 			unlink($filename);
 			
 		}
-			
+		
 		/*
 		 * Try again to render this as an object with PHP Simple HTML DOM Parser.
 		 */
-		$html = str_get_html($html);
+		$dom = str_get_html($html);
 		
-		if ($html === FALSE)
+		if ($dom === FALSE)
 		{
 			die('Invalid HTML -- could not be rendered as an object.');
 		}
@@ -103,9 +114,9 @@ function fetch_list($period_id)
 	 */
 	$lobbyists = new stdClass();
 	
-	foreach ($html->find('table[id=lobbyistList]') as $table)
+	foreach ($dom->find('tbody') as $table)
 	{
-	
+		die('tbody');
 		$i=0;
 		
 		/*
@@ -113,13 +124,22 @@ function fetch_list($period_id)
 		 */
 		foreach ($table->find('tr') as $registration)
 		{
-			$lobbyists->{$i}->url = 'https://solutions.virginia.gov' . $registration->find('a', 0)->href;
-			$lobbyists->{$i}->name = $registration->find('td', 0)->plaintext;
-			$lobbyists->{$i}->organization = $registration->find('td', 1)->plaintext;
-			$lobbyists->{$i}->principal = $registration->find('td', 2)->plaintext;
-			$lobbyists->{$i}->id = str_replace('contactId=', '', strstr($lobbyists->{$i}->url, 'contactId='));
+			$lobbyists->{$i}->url = 'https://solutions.virginia.gov' . trim($registration->find('a', 0)->href);
+			$lobbyists->{$i}->name = trim($registration->find('td', 0)->plaintext);
+			$lobbyists->{$i}->organization = trim($registration->find('td', 1)->plaintext);
+			$lobbyists->{$i}->principal = trim($registration->find('td', 2)->plaintext);
+			$lobbyists->{$i}->id = str_replace('contactId=', '', trim(strstr($lobbyists->{$i}->url, 'contactId=')));
 			$i++;
 		}
+	}
+	
+	/*
+	 * It's possible that we failed to identify any lobbyists. This would likely be a result of a
+	 * change in the HTML that rendered useless our HTML scraping.
+	 */
+	if (count((array) $lobbyists) == 0)
+	{
+		return FALSE;
 	}
 	
 	return $lobbyists;
@@ -193,7 +213,7 @@ foreach ($periods as $period_id => $period_range)
 	 */
 	$filename = substr($period_range, 0, 4) . '.json';
 	
-	echo $period_range . PHP_EOL;
+	echo 'Retreiving '.$period_range . '...';
 	
 	/*
 	 * Only update the file if we don't already have a copy.
@@ -201,7 +221,15 @@ foreach ($periods as $period_id => $period_range)
 	if (file_exists($filename) === FALSE)
 	{
 		$registrations = fetch_list($period_id);
-		file_put_contents($filename, json_encode($registrations));
+		if ($registrations !== FALSE)
+		{
+			file_put_contents($filename, json_encode($registrations));
+			echo 'succeeded.' . PHP_EOL;
+		}
+		else
+		{
+			echo 'failed.' . PHP_EOL;
+		}
 	}
 	
 	/*
