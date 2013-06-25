@@ -67,13 +67,13 @@ function fetch_list($period_id)
 	 * Render this as an object with PHP Simple HTML DOM Parser.
 	 */
 	$dom = str_get_html($html);
-
+	
 	/*
 	 * We could not render this HTML as an object.
 	 */
 	if ($dom === FALSE)
 	{
-
+		
 		/*
 		 * This HTML is invalid. Clean it up with HTML Tidy.
 		 */
@@ -84,7 +84,6 @@ function fetch_list($period_id)
 			$tidy->parseString($html);
 			$tidy->cleanRepair();
 			$html = $tidy;
-			
 		}
 		
 		elseif (exec('which tidy'))
@@ -113,10 +112,11 @@ function fetch_list($period_id)
 	 * Create the object that we'll use to store the list of periods.
 	 */
 	$lobbyists = new stdClass();
-	
+
+// The problem is that this statement is failing -- no <tbody> tags are being found.
 	foreach ($dom->find('tbody') as $table)
 	{
-		die('tbody');
+		
 		$i=0;
 		
 		/*
