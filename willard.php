@@ -233,6 +233,14 @@ foreach ($periods as $period_id => $period_range)
 	}
 	
 	/*
+	 * If we already have a copy, acknowledge it.
+	 */
+	else
+	{
+		echo 'using cached copy.' . PHP_EOL;
+	}
+	
+	/*
 	 * Connect to
 	 * https://solutions.virginia.gov/Lobbyist/Reports/LobbyistSearch/Detail?contactId=' . $contactid
 	 * and retrieve the lobbyist's address, phone number, and principal's statement.
