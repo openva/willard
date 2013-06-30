@@ -112,29 +112,25 @@ function fetch_list($period_id)
 	 * Create the object that we'll use to store the list of periods.
 	 */
 	$lobbyists = new stdClass();
-
-// The problem is that this statement is failing -- no <tbody> tags are being found.
-	foreach ($dom->find('tbody') as $table)
 	
 	$i=0;
 	
+	/*
+	 * Iterate through the table rows -- each row is a single registration.
+	 */
+	foreach ($dom->find('tr') as $registration)
 	{
 		
 		$lobbyists->{$i} = new stdClass();
 		
+		$lobbyists->{$i}->url = 'https://solutions.virginia.gov' . trim($registration->find('a', 0)->href);
+		$lobbyists->{$i}->name = trim($registration->find('td', 0)->plaintext);
+		$lobbyists->{$i}->organization = trim($registration->find('td', 1)->plaintext);
+		$lobbyists->{$i}->principal = trim($registration->find('td', 2)->plaintext);
+		$lobbyists->{$i}->id = str_replace('contactId=', '', trim(strstr($lobbyists->{$i}->url, 'contactId=')));
 		
-		/*
-		 * Iterate through the table rows -- each row is a single registration.
-		 */
-		foreach ($table->find('tr') as $registration)
-		{
-			$lobbyists->{$i}->url = 'https://solutions.virginia.gov' . trim($registration->find('a', 0)->href);
-			$lobbyists->{$i}->name = trim($registration->find('td', 0)->plaintext);
-			$lobbyists->{$i}->organization = trim($registration->find('td', 1)->plaintext);
-			$lobbyists->{$i}->principal = trim($registration->find('td', 2)->plaintext);
-			$lobbyists->{$i}->id = str_replace('contactId=', '', trim(strstr($lobbyists->{$i}->url, 'contactId=')));
-			$i++;
-		}
+		$i++;
+		
 	}
 	
 	/*
