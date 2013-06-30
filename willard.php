@@ -115,9 +115,13 @@ function fetch_list($period_id)
 
 // The problem is that this statement is failing -- no <tbody> tags are being found.
 	foreach ($dom->find('tbody') as $table)
+	
+	$i=0;
+	
 	{
 		
-		$i=0;
+		$lobbyists->{$i} = new stdClass();
+		
 		
 		/*
 		 * Iterate through the table rows -- each row is a single registration.
