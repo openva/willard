@@ -1,8 +1,5 @@
 <?php
 
-// TO DO
-// It's outputting blank data for all years, up until 2013. That's obviously bad.
-
 /**
  * Willard
  *
