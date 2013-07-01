@@ -163,8 +163,120 @@ function fetch_list($period_id)
 }
 
 /**
+ * Fetch the record for a single lobbyist.
+ */
+function fetch_lobbyist($url)
+{
+	if (empty($url))
+	{
+		return false;
+	}
+	
+	$html = fetch_url($url);
+	
+	/*
+	 * Carve out the bit that we need, ignoring everything else.
+	 */
+	$start = strpos($html, '<table>');
+	$end = strpos($html, '</table>');
+	$html = substr($html, $start, ($end - $start + 7));
+	
+	/*
+	 * Render this as an object with PHP Simple HTML DOM Parser.
+	 */
+	$dom = str_get_html($html);
+	
+	/*
+	 * We could not render this HTML as an object.
+	 */
+	if ($dom === FALSE)
+	{
+		
+		/*
+		 * This HTML is invalid. Clean it up with HTML Tidy.
+		 */
+		if (class_exists('tidy', FALSE))
+		{
+	
+			$tidy = new tidy;
+			$tidy->parseString($html);
+			$tidy->cleanRepair();
+			$html = $tidy;
+		}
+		
+		elseif (exec('which tidy'))
+		{
+		
+			$filename = '/tmp/' . $period_id .'.tmp';
+			file_put_contents($filename, $html);
+			exec('tidy --show-errors 0 --show-warnings no -q -m ' . $filename);
+			$html = file_get_contents($filename);
+			unlink($filename);
+			
+		}
+		
+		/*
+		 * Try again to render this as an object with PHP Simple HTML DOM Parser.
+		 */
+		$dom = str_get_html($html);
+		
+		/*
+		 * If we still can't render this as an object, then give up on this lobbyist record.
+		 */
+		if ($dom === FALSE)
+		{
+			return FALSE;
+		}
+	}
+	
+	/*
+	 * Grab two of the table cells.
+	 */
+	$address = trim($dom->find('td', 0)->plaintext);
+	$statement = trim($dom->find('td', 2)->plaintext);
+	
+	/*
+	 * Create an object to store these data in.
+	 */
+	$lobbyist = new stdClass();
+	
+	/*
+	 * The address field is broken up into two components -- address and phone number.
+	 */
+	$tmp = explode("\n", $address);
+	$lobbyist->address = trim(implode("\n", array_slice($tmp, 1, -1)));
+	$lobbyist->phone_number = trim(implode('', array_slice($tmp, -1)));
+	
+	/*
+	 * The statement field is broken up into two components -- statement and date registered.
+	 */
+	$tmp = explode('Registered:', $statement);
+	$lobbyist->statement = trim($tmp[0]);
+	$lobbyist->registered = date('Y-m-d', strtotime(trim($tmp[1])));
+	
+	/*
+	 * Remove any blank lines from the address field and standardize the address.
+	 */
 	$normalizer = new AddressStandardizationSolution;
+	$address = explode("\n", $lobbyist->address);
+	foreach ($address as &$tmp)
+	{
+		$tmp = trim($tmp);
+		if (empty($tmp))
+		{
+			unset($tmp);
+		}
+		
 		$tmp = $normalizer->AddressLineStandardization($tmp);
+		
+	}
+	$lobbyist->address = implode("\n", $address);
+	
+	return $lobbyist;
+	
+}
+
+/**
  * Retrieve the content at a given URL.
  */
 function fetch_url($url)
@@ -269,6 +381,53 @@ foreach ($periods as $period_id => $period_range)
 	else
 	{
 		echo 'using cached copy.' . PHP_EOL;
+	}
+	
+	/*
+	 * Iterate through the list of lobbyists in this batch of registrations and retrive the record
+	 * for each one of them.
+	 */
+	foreach ($registrations as $registration)
+	{
+		
+		/*
+		 * Only save this lobbyist registration if we haven't done so already.
+		 */
+		if (!file_exists(LOBBYIST_DIR . '/' . $registration->id . '.json'))
+		{
+		
+			$lobbyist = fetch_lobbyist($registration->url);
+			
+			if ($lobbyist === FALSE)
+			{
+				echo 'Error: Could not retrieve lobbyist record ' . $registration->id . PHP_EOL;
+			}
+			
+			/*
+			 * Append this new data to the existing registration data.
+			 */
+			$tmp = array_merge((array) $registration, (array) $lobbyist);
+			$registration = (object) $tmp;
+			unset($tmp);
+			
+			/*
+			 * Store this lobbyist record in the filesystem.
+			 */
+			$result = file_put_contents(LOBBYIST_DIR . '/' . $registration->id . '.json', json_encode($lobbyist));
+			
+			/*
+			 * If we cannot store this lobbyist record, then we've got bigger problems -- abandon
+			 * the entire process.
+			 */
+			if ($result === FALSE)
+			{
+				die('Unable to write lobbyist record to ' . LOBBYIST_DIR . '/' . $registration->id . '.json.');
+			}
+			
+			echo 'Saved ' . $registration->name . '.' . PHP_EOL;
+			
+		}
+		
 	}
 	
 	/*
