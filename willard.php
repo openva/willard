@@ -16,6 +16,12 @@
  * @since		0.1
  *
  */
+ 
+/*
+ * Define configuration options.
+ */
+define('PERIOD_DIR', 'year');
+define('LOBBYIST_DIR', 'lobbyist');
 
 /*
  * Include the Simple HTML DOM Parser.
@@ -215,12 +221,12 @@ foreach ($periods as $period_id => $period_range)
 	/*
 	 * Only update the file if we don't already have a copy.
 	 */
-	if (file_exists($filename) === FALSE)
+	if (file_exists(PERIOD_DIR . '/' . $filename) === FALSE)
 	{
 		$registrations = fetch_list($period_id);
 		if ($registrations !== FALSE)
 		{
-			file_put_contents($filename, json_encode($registrations));
+			file_put_contents(PERIOD_DIR . '/' . $filename, json_encode($registrations));
 			echo 'succeeded.' . PHP_EOL;
 		}
 		else
