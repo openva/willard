@@ -20,8 +20,8 @@
 /*
  * Define configuration options.
  */
-define('PERIOD_DIR', 'year');
-define('LOBBYIST_DIR', 'lobbyist');
+define('PERIOD_DIR', 'years');
+define('LOBBYIST_DIR', 'lobbyists');
 
 /*
  * Our time zone. (This is, of course, EST, but we have to define this to keep PHP from
