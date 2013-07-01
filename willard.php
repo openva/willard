@@ -381,6 +381,13 @@ foreach ($periods as $period_id => $period_range)
 	else
 	{
 		echo 'using cached copy.' . PHP_EOL;
+		
+		/*
+		 * Get the list of registrations from the file, so that we can iterate through them and
+		 * retrieve additional data about them.
+		 */
+		$registrations = json_decode(file_get_contents(PERIOD_DIR . '/' . $filename));
+		
 	}
 	
 	/*
