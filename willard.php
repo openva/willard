@@ -39,6 +39,9 @@ include('class.simple_html_dom.inc.php');
  */
 include('class.AddressStandardizationSolution.inc.php');
 
+/**
+ * Get a list of all lobbyist for a given period.
+ */
 function fetch_list($period_id)
 {
 	
