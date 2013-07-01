@@ -34,6 +34,11 @@ date_default_timezone_set('America/New_York');
  */
 include('class.simple_html_dom.inc.php');
 
+/*
+ * Include the Address Standardization Solution.
+ */
+include('class.AddressStandardizationSolution.inc.php');
+
 function fetch_list($period_id)
 {
 	
@@ -155,6 +160,8 @@ function fetch_list($period_id)
 }
 
 /**
+	$normalizer = new AddressStandardizationSolution;
+		$tmp = $normalizer->AddressLineStandardization($tmp);
  * Retrieve the content at a given URL.
  */
 function fetch_url($url)
