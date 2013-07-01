@@ -222,6 +222,18 @@ foreach ($html->find('option') as $option)
 }
 
 /*
+ * Create the directories, if they don't already exist.
+ */
+if (!file_exists(PERIOD_DIR))
+{
+	mkdir(PERIOD_DIR);
+}
+if (!file_exists(LOBBYIST_DIR))
+{
+	mkdir(LOBBYIST_DIR);
+}
+
+/*
  * Step through every biennium and download a list of all lobbyist registrations for that period.
  */
 foreach ($periods as $period_id => $period_range)
