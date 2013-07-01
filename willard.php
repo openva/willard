@@ -420,7 +420,7 @@ foreach ($periods as $period_id => $period_range)
 			/*
 			 * Store this lobbyist record in the filesystem.
 			 */
-			$result = file_put_contents(LOBBYIST_DIR . '/' . $registration->id . '.json', json_encode($lobbyist));
+			$result = file_put_contents(LOBBYIST_DIR . '/' . $registration->id . '.json', json_encode($registration));
 			
 			/*
 			 * If we cannot store this lobbyist record, then we've got bigger problems -- abandon
