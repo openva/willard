@@ -244,7 +244,7 @@ foreach ($periods as $period_id => $period_range)
 	 */
 	$filename = substr($period_range, 0, 4) . '.json';
 	
-	echo 'Retreiving '.$period_range . '...';
+	echo 'Retrieving ' . $period_range . '...';
 	
 	/*
 	 * Only update the file if we don't already have a copy.
