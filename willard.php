@@ -283,10 +283,24 @@ function fetch_lobbyist($url)
 			unset($tmp);
 		}
 		
-		$tmp = $normalizer->AddressLineStandardization($tmp);
-		
+		$tmp = $normalizer->AddressLineStandardization($tmp);	
 	}
 	$lobbyist->address = implode("\n", $address);
+	
+	/*
+	 * And now atomize the address.
+	 */
+	$tmp = explode("\n", $lobbyist->address);
+	$lobbyist->address = new stdClass();
+	$lobbyist->address->street_1 = $tmp[0];
+	if (count($tmp) == 3)
+	{
+		$lobbyist->address->street_2 = $tmp[1];
+	}
+	preg_match('/(.*) ([A-Z]{2}) ([0-9]{5})/', array_shift(array_slice($tmp, -1)), $components);
+	$lobbyist->address->city = $components[1];
+	$lobbyist->address->state = $components[2];
+	$lobbyist->address->zip_code = $components[3];
 	
 	return $lobbyist;
 	
