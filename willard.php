@@ -259,6 +259,11 @@ function fetch_lobbyist($url)
 	$lobbyist->phone_number = trim(implode('', array_slice($tmp, -1)));
 	
 	/*
+	 * Reformat the phone number field from (555) 555-1212 to 555-555-1212.
+	 */
+	$lobbyist->phone_number = preg_replace('/\(([0-9]{3})\) /', '\1-', $lobbyist->phone_number);
+	
+	/*
 	 * The statement field is broken up into two components -- statement and date registered.
 	 */
 	$tmp = explode('Registered:', $statement);
