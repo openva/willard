@@ -146,6 +146,17 @@ function fetch_list($period_id)
 		$lobbyists->{$i}->principal = trim($registration->find('td', 2)->plaintext);
 		$lobbyists->{$i}->id = str_replace('contactId=', '', trim(strstr($lobbyists->{$i}->url, 'contactId=')));
 		
+		/*
+		 * Drop any blank fields.
+		 */
+		foreach ($lobbyists->{$i} as &$field)
+		{
+			if (empty($field))
+			{
+				unset($field);
+			}
+		}
+		
 		$i++;
 		
 	}
