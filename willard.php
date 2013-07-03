@@ -339,7 +339,7 @@ function fetch_url($url)
 	
 	if ($html === FALSE)
 	{
-		die(curl_error($ch));
+		echo curl_error($ch) . PHP_EOL;
 	}
 	
 	return $html;
