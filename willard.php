@@ -149,11 +149,11 @@ function fetch_list($period_id)
 		/*
 		 * Drop any blank fields.
 		 */
-		foreach ($lobbyists->{$i} as &$field)
+		foreach ($lobbyists->{$i} as $key => &$value)
 		{
-			if (empty($field))
+			if (empty($value))
 			{
-				unset($field);
+				unset($lobbyists->{$i}->$key);
 			}
 		}
 		
