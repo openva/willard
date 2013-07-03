@@ -480,19 +480,4 @@ foreach ($periods as $period_id => $period_range)
 		
 	}
 	
-	/*
-	 * Connect to
-	 * https://solutions.virginia.gov/Lobbyist/Reports/LobbyistSearch/Detail?contactId=' . $contactid
-	 * and retrieve the lobbyist's address, phone number, and principal's statement.
-	 * THERE MAY BE MORE TO RETRIEVE FOR SOME FILINGS. Analyze them to find out.
-	 *
-	 * Store a JSON-based record of each lobbyist's data.
-	 *
-	 * Note that lobbyist IDs are not unique. If somebody has registered six times, they have six
-	 * IDs. So we need to match-merge duplicates, and set up a table that cross-references them.
-	 *
-	 * This may call for SQLite. Use PDO SQLite.
-	 */
-	
-	
 }
