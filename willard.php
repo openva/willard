@@ -147,6 +147,19 @@ function fetch_list($period_id)
 		$lobbyists->{$i}->id = str_replace('contactId=', '', trim(strstr($lobbyists->{$i}->url, 'contactId=')));
 		
 		/*
+		 * Check to see if the registration has been terminated. There's no special field for this,
+		 * but instead it's just stored parenthetically after the registrant's name.
+		 */
+		$pos = strpos($lobbyists->{$i}->name, '(Registration');
+		if ($pos !== FALSE)
+		{
+			$tmp = substr($lobbyists->{$i}->name, $pos);
+			preg_match('/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})/', $tmp, $date);
+			$lobbyists->{$i}->terminated = date('Y-m-d', strtotime($date[0]));
+			$lobbyists->{$i}->name = substr($lobbyists->{$i}->name, 0, $pos);
+		}
+		
+		/*
 		 * Drop any blank fields.
 		 */
 		foreach ($lobbyists->{$i} as $key => &$value)
