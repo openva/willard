@@ -461,6 +461,12 @@ foreach ($periods as $period_id => $period_range)
 			unset($tmp);
 			
 			/*
+			 * Create an MD5 hash that's unique to this lobbyist, based on his name and phone
+			 * number, to allow us to connect lobbyists filings by the same person.
+			 */
+			$registration->hash = md5($registration->name . $registration->phone_number);
+			
+			/*
 			 * Store this lobbyist record in the filesystem.
 			 */
 			$result = file_put_contents(LOBBYIST_DIR . '/' . $registration->id . '.json', json_encode($registration));
